@@ -32,16 +32,6 @@ public class UserService {
         String username = signupRequestDto.getUsername();
         String password = passwordEncoder.encode(signupRequestDto.getPassword());
 
-        // 아이디 형식 확인
-        if (!Pattern.matches("^(?=.*[a-z])(?=.*\\d)[a-z0-9]{4,10}$", username)) {
-            return UserResponseDto.setFailed("형식에 맞지 않는 아이디 입니다.");
-        }
-
-        // 비밀번호 형식 확인
-        if (!Pattern.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[~!@#$%^&])[a-zA-Z\\d~!@#$%^&]{8,15}$", password)) {
-            return UserResponseDto.setFailed("형식에 맞지 않는 비밀번호 입니다.");
-        }
-
         // 회원 중복 확인
         Optional<Users> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
