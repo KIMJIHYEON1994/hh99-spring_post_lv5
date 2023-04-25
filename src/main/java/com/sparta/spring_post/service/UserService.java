@@ -8,6 +8,7 @@ import com.sparta.spring_post.entity.Users;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     // JwtUtil 연결
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
     private static final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
 
     @Transactional
@@ -65,16 +67,29 @@ public class UserService {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
 
-        // 아이디 확인
-        Optional<Users> found = userRepository.findByUsername(username);
-        if (!found.isPresent()) {
-            return UserResponseDto.setFailed("회원을 찾을 수 없습니다.");
-        }
+//        // 아이디 확인
+//        Optional<Users> found = userRepository.findByUsername(username);
+//        if (!found.isPresent()) {
+//            return UserResponseDto.setFailed("회원을 찾을 수 없습니다.");
+//        }
+//
+//        Users user = userRepository.findByUsername(username).orElseThrow();
+//
+//        // 비밀번호 확인
+//        if (!user.getPassword().equals(password)) {
+//            return UserResponseDto.setFailed("일치하지 않는 비밀번호 입니다.");
+//        }
+//
+//        httpServletResponse.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
 
-        Users user = userRepository.findByUsername(username).orElseThrow();
+        // 사용자 확인
+        Users user = userRepository.findByUsername(username).orElseThrow(
+                () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
+        );
+
         // 비밀번호 확인
-        if (!user.getPassword().equals(password)) {
-            return UserResponseDto.setFailed("일치하지 않는 비밀번호 입니다.");
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
         httpServletResponse.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
