@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public UserResponseDto<Users> signup(@RequestBody SignupRequestDto signupRequestDto) {
+    public UserResponseDto<Users> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
         return userService.signup(signupRequestDto);
     }
 
