@@ -30,7 +30,7 @@ public class UserService {
     @Transactional
     public UserResponseDto<Users> signup(SignupRequestDto signupRequestDto) {
         String username = signupRequestDto.getUsername();
-        String password = signupRequestDto.getPassword();
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
 
         // 아이디 형식 확인
         if (!Pattern.matches("^(?=.*[a-z])(?=.*\\d)[a-z0-9]{4,10}$", username)) {
