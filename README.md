@@ -1,3 +1,3 @@
-# 스프링 주특기 LV.3 과제
+# 스프링 주특기 LV.4 과제
 
-https://teamsparta.notion.site/Spring-Lv-3-61227372735242bb903ea8c575e66a3f
+https://teamsparta.notion.site/Spring-Lv-4-4d941dd963e84d138b08b89bb812de08
