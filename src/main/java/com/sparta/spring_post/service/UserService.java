@@ -51,7 +51,7 @@ public class UserService {
         return UserResponseDto.setSuccess("회원가입 성공!");
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserResponseDto<Users> login(LoginRequestDto loginRequestDto, HttpServletResponse httpServletResponse) {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
