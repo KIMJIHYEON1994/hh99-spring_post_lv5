@@ -2,15 +2,10 @@ package com.sparta.spring_post.controller;
 
 import com.sparta.spring_post.dto.PostRequestDto;
 import com.sparta.spring_post.dto.PostResponseDto;
-import com.sparta.spring_post.dto.SecurityExceptionDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Post;
-import com.sparta.spring_post.security.UserDetailsImpl;
 import com.sparta.spring_post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +45,7 @@ public class PostController {
 
     // 삭제
     @DeleteMapping("/post/{id}")
-    public ResponseEntity<SecurityExceptionDto> deletePost(@PathVariable Long id, HttpServletRequest httpServletRequest) {
+    public UserResponseDto<Post> deletePost(@PathVariable Long id, HttpServletRequest httpServletRequest) {
         return postService.deletePost(id, httpServletRequest);
     }
 

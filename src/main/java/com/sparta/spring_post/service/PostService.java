@@ -2,7 +2,6 @@ package com.sparta.spring_post.service;
 
 import com.sparta.spring_post.dto.PostRequestDto;
 import com.sparta.spring_post.dto.PostResponseDto;
-import com.sparta.spring_post.dto.SecurityExceptionDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.entity.PostLike;
@@ -14,11 +13,8 @@ import com.sparta.spring_post.repository.CommentRepository;
 import com.sparta.spring_post.repository.PostLikeRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
-import com.sparta.spring_post.security.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.sparta.spring_post.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +51,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
         );
         return new PostResponseDto(post);
     }
@@ -74,7 +71,7 @@ public class PostService {
         Users user = checkJwtToken(httpServletRequest);
 
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
         );
 
         if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
@@ -87,15 +84,15 @@ public class PostService {
 
     // 게시물 삭제
     @Transactional
-    public ResponseEntity<SecurityExceptionDto> deletePost(Long id, HttpServletRequest httpServletRequest) {
+    public UserResponseDto<Post> deletePost(Long id, HttpServletRequest httpServletRequest) {
         Users user = checkJwtToken(httpServletRequest);
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
         );
 
         if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             postRepository.delete(post);
-            return ResponseEntity.ok(new SecurityExceptionDto("삭제 완료", HttpStatus.OK.value()));
+            return UserResponseDto.setSuccess("게시글 삭제 성공");
         } else {
             throw new CustomException(ErrorCode.INVALID_USER);
         }
@@ -106,15 +103,15 @@ public class PostService {
     @Transactional
     public UserResponseDto<Post> updateLike(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
         );
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = userRepository.findByUsername(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.INVALID_TOKEN)
+                () -> new CustomException(ErrorCode.INVALID_USER)
         );
 
-        if (postLikeRepository.findByPostAndUser(post,user) == null) {
+        if (postLikeRepository.findByPostAndUser(post, user) == null) {
             postLikeRepository.save(new PostLike(post, user));
             post.updateLike(true);
             return UserResponseDto.setSuccess("좋아요 성공");
@@ -140,12 +137,12 @@ public class PostService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new CustomException(ErrorCode.INVALID_TOKEN);
+                throw new CustomException(INVALID_AUTH_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             Users user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(USER_NOT_FOUND)
             );
             return user;
 
