@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sparta.spring_post.dto.PostRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.util.List;
@@ -31,6 +32,10 @@ public class Post extends Timestamped {
     @OrderBy("id asc")
     @JsonBackReference
     private List<Comment> comments;
+
+    @Column
+    @ColumnDefault("0")
+    private int like;
 
 
     public Post(Users users, PostRequestDto postRequestDto) {
