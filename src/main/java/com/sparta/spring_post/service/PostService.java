@@ -9,8 +9,11 @@ import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.CommentRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
+import com.sparta.spring_post.security.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +91,17 @@ public class PostService {
         }
 
     }
+
+    // 좋아요
+//    @Transactional
+//    public PostResponseDto updateLike(Long id, UserDetailsImpl userDetails) {
+//        Post post = postRepository.findById(id).orElseThrow(
+//                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 게시글이 없습니다.")))
+//        );
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//    }
 
 
     // 토큰 체크
