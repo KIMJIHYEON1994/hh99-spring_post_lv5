@@ -7,6 +7,7 @@ import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.security.UserDetailsImpl;
 import com.sparta.spring_post.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,8 +54,8 @@ public class PostController {
 
     // 좋아요
     @PutMapping("/post/like/{id}")
-    public UserResponseDto<Post> updateLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return postService.updateLike(id, userDetails);
+    public UserResponseDto<Post> updateLike(@PathVariable Long id) {
+        return postService.updateLike(id);
     }
 
 }

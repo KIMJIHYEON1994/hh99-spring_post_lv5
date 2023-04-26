@@ -97,7 +97,7 @@ public class PostService {
 
     // 좋아요
     @Transactional
-    public UserResponseDto<Post> updateLike(Long id, UserDetailsImpl userDetails) {
+    public UserResponseDto<Post> updateLike(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 게시글이 없습니다.")))
         );
