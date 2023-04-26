@@ -6,6 +6,7 @@ import com.sparta.spring_post.entity.Comment;
 import com.sparta.spring_post.entity.CommentLike;
 import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.entity.Users;
+import com.sparta.spring_post.exception.CustomException;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.CommentLikeRepository;
 import com.sparta.spring_post.repository.CommentRepository;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static com.sparta.spring_post.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class CommentService {
         Users user = checkJwtToken(httpServletRequest);
 
         Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(
-                () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
+                () -> new CustomException(POST_NOT_FOUND)
         );
 
 
@@ -51,14 +54,14 @@ public class CommentService {
         Users user = checkJwtToken(httpServletRequest);
 
         Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
+                () -> new CustomException(COMMENT_NOT_FOUND)
         );
 
         if (comment.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             comment.update(commentRequestDto);
             return UserResponseDto.setSuccess("댓글이 수정되었습니다.");
         } else {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new CustomException(INVALID_USER);
         }
 
     }
@@ -69,14 +72,14 @@ public class CommentService {
         Users user = checkJwtToken(httpServletRequest);
 
         Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
+                () -> new CustomException(COMMENT_NOT_FOUND)
         );
 
         if (comment.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             commentRepository.delete(comment);
             return UserResponseDto.setSuccess("댓글 삭제 성공");
         } else {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new CustomException(INVALID_USER);
         }
 
     }
@@ -85,12 +88,12 @@ public class CommentService {
     @Transactional
     public UserResponseDto<Comment> likeComment(Long id) {
         Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 댓글이 없습니다.")))
+                () -> new CustomException(COMMENT_NOT_FOUND)
         );
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = userRepository.findByUsername(authentication.getName()).orElseThrow(
-                () -> new IllegalArgumentException(String.valueOf(UserResponseDto.setFailed("권한이 없습니다.")))
+                () -> new CustomException(INVALID_USER)
         );
 
         if (commentLikeRepository.findByCommentAndUser(comment, user) == null) {
@@ -118,12 +121,12 @@ public class CommentService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_AUTH_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             Users user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(USER_NOT_FOUND)
             );
             return user;
 

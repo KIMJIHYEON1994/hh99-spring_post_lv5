@@ -3,6 +3,7 @@ package com.sparta.spring_post.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
@@ -12,11 +13,6 @@ public class UserResponseDto<D> {
     private int statusCode;
 
     public static <D> UserResponseDto<D> setSuccess(String message) {
-        return UserResponseDto.set(message, 200);
+        return UserResponseDto.set(message, HttpStatus.OK.value());
     }
-
-    public static <D> UserResponseDto<D> setFailed(String message) {
-        return UserResponseDto.set(message, 400);
-    }
-
 }
