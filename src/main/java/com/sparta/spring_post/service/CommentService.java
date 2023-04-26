@@ -121,7 +121,7 @@ public class CommentService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new CustomException(INVALID_AUTH_TOKEN);
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
