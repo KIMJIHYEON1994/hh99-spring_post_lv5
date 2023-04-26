@@ -2,10 +2,9 @@ package com.sparta.spring_post.service;
 
 import com.sparta.spring_post.dto.CommentRequestDto;
 import com.sparta.spring_post.dto.UserResponseDto;
-import com.sparta.spring_post.entity.Comment;
-import com.sparta.spring_post.entity.Post;
-import com.sparta.spring_post.entity.Users;
+import com.sparta.spring_post.entity.*;
 import com.sparta.spring_post.jwt.JwtUtil;
+import com.sparta.spring_post.repository.CommentLikeRepository;
 import com.sparta.spring_post.repository.CommentRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
@@ -15,15 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
+    private final JwtUtil jwtUtil;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final JwtUtil jwtUtil;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 댓글 등록
     @Transactional
@@ -76,6 +77,28 @@ public class CommentService {
 
     }
 
+    // 댓글 좋아요
+    @Transactional
+    public UserResponseDto<Comment> likeComment(Long id, HttpServletRequest httpServletRequest) {
+        Users user = checkJwtToken(httpServletRequest);
+        Comment comment = commentRepository.findById(id).orElseThrow(
+                () -> new NullPointerException("해당 댓글이 존재하지 않습니다.")
+        ); // 1번 댓글을 가지고 옴
+
+        // 위에서 1번 댓글이 있다면 그 댓글에 달린 좋아요를 가져옴
+        Optional<CommentLike> commentLike = commentLikeRepository.findById(comment.getId());
+
+        if (commentLike.isEmpty()) {
+            comment.updateLike();
+            commentLikeRepository.save(new CommentLike(comment.getId(), comment.getUsers()));
+            return UserResponseDto.setSuccess("좋아요 성공");
+        } else {
+            comment.updateDislike();
+            commentLikeRepository.deleteByCommentId(comment.getId());
+            return UserResponseDto.setSuccess("좋아요 취소");
+        }
+    }
+
 
     // 토큰 체크
     public Users checkJwtToken(HttpServletRequest request) {
@@ -101,4 +124,6 @@ public class CommentService {
         }
         return null;
     }
+
+
 }
