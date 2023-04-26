@@ -37,7 +37,6 @@ public class Post extends Timestamped {
     @ColumnDefault("0")
     private int like;
 
-
     public Post(Users users, PostRequestDto postRequestDto) {
         this.users = users;
         this.title = postRequestDto.getTitle();
@@ -47,6 +46,10 @@ public class Post extends Timestamped {
     public void update(PostRequestDto postRequestDto) {
         this.title = postRequestDto.getTitle();
         this.content = postRequestDto.getContent();
+    }
+
+    public void updateLike(boolean likeOrDislike) {
+        this.like = likeOrDislike ? this.like + 1 : this.like - 1;
     }
 
 }
