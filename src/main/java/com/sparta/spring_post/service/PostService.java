@@ -2,10 +2,13 @@ package com.sparta.spring_post.service;
 
 import com.sparta.spring_post.dto.PostRequestDto;
 import com.sparta.spring_post.dto.PostResponseDto;
+import com.sparta.spring_post.dto.SecurityExceptionDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.entity.PostLike;
 import com.sparta.spring_post.entity.Users;
+import com.sparta.spring_post.exception.CustomException;
+import com.sparta.spring_post.exception.ErrorCode;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.CommentRepository;
 import com.sparta.spring_post.repository.PostLikeRepository;
@@ -14,6 +17,8 @@ import com.sparta.spring_post.repository.UserRepository;
 import com.sparta.spring_post.security.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,7 +54,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new NullPointerException(id + "번 게시물이 존재하지 않습니다.")
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
         );
         return new PostResponseDto(post);
     }
@@ -68,29 +73,31 @@ public class PostService {
     public PostResponseDto updatePost(Long id, PostRequestDto postRequestDto, HttpServletRequest httpServletRequest) {
         Users user = checkJwtToken(httpServletRequest);
 
-        Post post = postRepository.findById(id).orElseThrow(() ->
-                new NullPointerException("해당 글이 존재하지 않습니다."));
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+        );
 
         if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             post.update(postRequestDto);
             return new PostResponseDto(post);
         } else {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new CustomException(ErrorCode.INVALID_USER);
         }
     }
 
     // 게시물 삭제
     @Transactional
-    public UserResponseDto<Post> deletePost(Long id, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<SecurityExceptionDto> deletePost(Long id, HttpServletRequest httpServletRequest) {
         Users user = checkJwtToken(httpServletRequest);
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("게시글 삭제 실패"))));
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
+        );
 
         if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             postRepository.delete(post);
-            return UserResponseDto.setSuccess("게시글 삭제 성공");
+            return ResponseEntity.ok(new SecurityExceptionDto("삭제 완료", HttpStatus.OK.value()));
         } else {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new CustomException(ErrorCode.INVALID_USER);
         }
 
     }
@@ -99,12 +106,12 @@ public class PostService {
     @Transactional
     public UserResponseDto<Post> updateLike(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 게시글이 없습니다.")))
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
         );
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = userRepository.findByUsername(authentication.getName()).orElseThrow(
-                () -> new IllegalArgumentException(String.valueOf(UserResponseDto.setFailed("권한이 없습니다.")))
+                () -> new CustomException(ErrorCode.INVALID_TOKEN)
         );
 
         if (postLikeRepository.findByPostAndUser(post,user) == null) {
@@ -133,7 +140,7 @@ public class PostService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(ErrorCode.INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
