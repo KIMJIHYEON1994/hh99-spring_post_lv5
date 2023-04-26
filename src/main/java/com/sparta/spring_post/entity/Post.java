@@ -5,6 +5,7 @@ import com.sparta.spring_post.dto.PostRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
+@DynamicInsert
 public class Post extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +35,7 @@ public class Post extends Timestamped {
     @JsonBackReference
     private List<Comment> comments;
 
-    @Column
+    @Column(name = "post_like")
     @ColumnDefault("0")
     private int like;
 

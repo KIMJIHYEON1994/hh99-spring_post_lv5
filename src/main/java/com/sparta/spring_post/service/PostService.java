@@ -4,9 +4,11 @@ import com.sparta.spring_post.dto.PostRequestDto;
 import com.sparta.spring_post.dto.PostResponseDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Post;
+import com.sparta.spring_post.entity.PostLike;
 import com.sparta.spring_post.entity.Users;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.CommentRepository;
+import com.sparta.spring_post.repository.PostLikeRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
 import com.sparta.spring_post.security.UserDetailsImpl;
@@ -28,6 +30,7 @@ public class PostService {
 
     // PostRepository 연결
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     // UserRepository 연결
     private final UserRepository userRepository;
@@ -93,15 +96,29 @@ public class PostService {
     }
 
     // 좋아요
-//    @Transactional
-//    public PostResponseDto updateLike(Long id, UserDetailsImpl userDetails) {
-//        Post post = postRepository.findById(id).orElseThrow(
-//                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 게시글이 없습니다.")))
-//        );
-//
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//    }
+    @Transactional
+    public UserResponseDto<Post> updateLike(Long id, UserDetailsImpl userDetails) {
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 게시글이 없습니다.")))
+        );
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Users user = userRepository.findByUsername(authentication.getName()).orElseThrow(
+                () -> new IllegalArgumentException(String.valueOf(UserResponseDto.setFailed("권한이 없습니다.")))
+        );
+
+        if (postLikeRepository.findByPostAndUser(post,user) == null) {
+            postLikeRepository.save(new PostLike(post, user));
+            post.updateLike(true);
+            return UserResponseDto.setSuccess("좋아요 성공");
+        } else {
+            PostLike postLike = postLikeRepository.findByPostAndUser(post, user);
+            postLikeRepository.delete(postLike);
+            post.updateLike(false);
+            return UserResponseDto.setSuccess("좋아요 취소");
+        }
+
+    }
 
 
     // 토큰 체크

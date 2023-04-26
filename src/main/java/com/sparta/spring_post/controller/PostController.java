@@ -53,7 +53,7 @@ public class PostController {
 
     // 좋아요
     @PutMapping("/post/like/{id}")
-    public PostResponseDto updateLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public UserResponseDto<Post> updateLike(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return postService.updateLike(id, userDetails);
     }
 
