@@ -5,6 +5,7 @@ import com.sparta.spring_post.dto.SignupRequestDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.RoleType;
 import com.sparta.spring_post.entity.Users;
+import com.sparta.spring_post.exception.CustomException;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
+
+import static com.sparta.spring_post.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +37,14 @@ public class UserService {
         // 회원 중복 확인
         Optional<Users> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
-            return UserResponseDto.setFailed("중복된 사용자입니다.");
+            throw new CustomException(INVALID_USER_EXISTENCE);
         }
 
         // 관리자 확인
         RoleType role = RoleType.USER;
         if (signupRequestDto.isAdmin()) {
             if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
-                return UserResponseDto.setFailed("관리자 암호가 틀려 등록이 불가능합니다.");
+                throw new CustomException(INVALID_ADMIN_PASSWORD);
             }
             role = RoleType.ADMIN;
         }
@@ -56,29 +59,14 @@ public class UserService {
         String username = loginRequestDto.getUsername();
         String password = loginRequestDto.getPassword();
 
-//        // 아이디 확인
-//        Optional<Users> found = userRepository.findByUsername(username);
-//        if (!found.isPresent()) {
-//            return UserResponseDto.setFailed("회원을 찾을 수 없습니다.");
-//        }
-//
-//        Users user = userRepository.findByUsername(username).orElseThrow();
-//
-//        // 비밀번호 확인
-//        if (!user.getPassword().equals(password)) {
-//            return UserResponseDto.setFailed("일치하지 않는 비밀번호 입니다.");
-//        }
-//
-//        httpServletResponse.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
-
         // 사용자 확인
         Users user = userRepository.findByUsername(username).orElseThrow(
-                () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
+                () -> new CustomException(USER_NOT_FOUND)
         );
 
         // 비밀번호 확인
         if(!passwordEncoder.matches(password, user.getPassword())){
-            throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw  new CustomException(INVALID_USER_PASSWORD);
         }
 
         httpServletResponse.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));

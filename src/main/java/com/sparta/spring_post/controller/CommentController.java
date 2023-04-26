@@ -3,7 +3,6 @@ package com.sparta.spring_post.controller;
 import com.sparta.spring_post.dto.CommentRequestDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Comment;
-import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
