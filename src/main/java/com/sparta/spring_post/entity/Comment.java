@@ -34,8 +34,8 @@ public class Comment extends Timestamped {
     private Users users;
 
 
+    @Column(name = "comment_like")
     @ColumnDefault("0")
-    @Column(name = "comment_like" )
     private Integer like;
     public Comment(Users user, CommentRequestDto commentRequestDto, Post post) {
         this.post = post;
@@ -48,11 +48,8 @@ public class Comment extends Timestamped {
         this.content = commentRequestDto.getContent();
     }
 
-    public void updateLike() {
-        this.like = like + 1;
-    }
-    public void updateDislike() {
-        this.like = like - 1;
+    public void updateLike(boolean likeOrDislike) {
+        this.like = likeOrDislike ? this.like + 1 : this.like - 1;
     }
 
 }

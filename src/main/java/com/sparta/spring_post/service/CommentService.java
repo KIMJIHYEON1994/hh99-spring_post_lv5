@@ -2,7 +2,10 @@ package com.sparta.spring_post.service;
 
 import com.sparta.spring_post.dto.CommentRequestDto;
 import com.sparta.spring_post.dto.UserResponseDto;
-import com.sparta.spring_post.entity.*;
+import com.sparta.spring_post.entity.Comment;
+import com.sparta.spring_post.entity.CommentLike;
+import com.sparta.spring_post.entity.Post;
+import com.sparta.spring_post.entity.Users;
 import com.sparta.spring_post.jwt.JwtUtil;
 import com.sparta.spring_post.repository.CommentLikeRepository;
 import com.sparta.spring_post.repository.CommentRepository;
@@ -10,11 +13,12 @@ import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -79,22 +83,24 @@ public class CommentService {
 
     // 댓글 좋아요
     @Transactional
-    public UserResponseDto<Comment> likeComment(Long id, HttpServletRequest httpServletRequest) {
-        Users user = checkJwtToken(httpServletRequest);
+    public UserResponseDto<Comment> likeComment(Long id) {
         Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("해당 댓글이 존재하지 않습니다.")
-        ); // 1번 댓글을 가지고 옴
+                () -> new NullPointerException(String.valueOf(UserResponseDto.setFailed("해당 댓글이 없습니다.")))
+        );
 
-        // 위에서 1번 댓글이 있다면 그 댓글에 달린 좋아요를 가져옴
-        Optional<CommentLike> commentLike = commentLikeRepository.findById(comment.getId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Users user = userRepository.findByUsername(authentication.getName()).orElseThrow(
+                () -> new IllegalArgumentException(String.valueOf(UserResponseDto.setFailed("권한이 없습니다.")))
+        );
 
-        if (commentLike.isEmpty()) {
-            comment.updateLike();
-            commentLikeRepository.save(new CommentLike(comment.getId(), comment.getUsers()));
+        if (commentLikeRepository.findByCommentAndUser(comment, user) == null) {
+            commentLikeRepository.save(new CommentLike(comment, user));
+            comment.updateLike(true);
             return UserResponseDto.setSuccess("좋아요 성공");
         } else {
-            comment.updateDislike();
-            commentLikeRepository.deleteByCommentId(comment.getId());
+            CommentLike commentLike = commentLikeRepository.findByCommentAndUser(comment, user);
+            commentLikeRepository.delete(commentLike);
+            comment.updateLike(false);
             return UserResponseDto.setSuccess("좋아요 취소");
         }
     }
@@ -124,6 +130,4 @@ public class CommentService {
         }
         return null;
     }
-
-
 }
