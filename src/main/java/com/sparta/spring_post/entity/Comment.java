@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sparta.spring_post.dto.CommentRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
 @NoArgsConstructor
+@DynamicInsert
 public class Comment extends Timestamped {
 
     @Id
@@ -31,6 +34,9 @@ public class Comment extends Timestamped {
     private Users users;
 
 
+    @ColumnDefault("0")
+    @Column(name = "comment_like" )
+    private Integer like;
     public Comment(Users user, CommentRequestDto commentRequestDto, Post post) {
         this.post = post;
         this.users = user;
@@ -40,6 +46,13 @@ public class Comment extends Timestamped {
 
     public void update(CommentRequestDto commentRequestDto) {
         this.content = commentRequestDto.getContent();
+    }
+
+    public void updateLike() {
+        this.like = like + 1;
+    }
+    public void updateDislike() {
+        this.like = like - 1;
     }
 
 }
