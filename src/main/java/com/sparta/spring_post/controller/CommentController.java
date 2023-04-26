@@ -1,5 +1,6 @@
 package com.sparta.spring_post.controller;
 
+import com.sparta.spring_post.dto.CommentLikeRequestDto;
 import com.sparta.spring_post.dto.CommentRequestDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Comment;
@@ -30,11 +31,15 @@ public class CommentController {
 
     // 댓글 삭제
     @DeleteMapping("/comment/{id}")
-    public UserResponseDto<Comment> deleteComment(@PathVariable Long id, HttpServletRequest httpServletRequest){
+    public UserResponseDto<Comment> deleteComment(@PathVariable Long id, HttpServletRequest httpServletRequest) {
         return commentService.deleteComment(id, httpServletRequest);
     }
 
-
+    // 댓글 좋아요
+    @PutMapping("/comment/like/{id}")
+    public UserResponseDto<Comment> likeComment(@PathVariable Long id, HttpServletRequest httpServletRequest) {
+        return commentService.likeComment(id, httpServletRequest);
+    }
 
 
 }
