@@ -17,6 +17,7 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private List<Comment> comments;
+    private int like;
 
 
     public PostResponseDto(Post post) {
@@ -27,5 +28,6 @@ public class PostResponseDto {
         this.createdAt = post.getCreatedAt();
         this.modifiedAt = post.getModifiedAt();
         this.comments = post.getComments();
+        this.like = post.getLike();
     }
 }
