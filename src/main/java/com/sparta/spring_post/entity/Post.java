@@ -2,6 +2,7 @@ package com.sparta.spring_post.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sparta.spring_post.dto.PostRequestDto;
+import com.sparta.spring_post.exception.CustomException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.List;
+
+import static com.sparta.spring_post.exception.ErrorCode.*;
 
 @Getter
 @Entity
@@ -42,15 +45,15 @@ public class Post extends Timestamped {
     public Post(PostRequestDto postRequestDto, Users user) {
         // 입력값 Validation
         if (user.getUsername() == null) {
-            throw new IllegalArgumentException("username이 존재하지 않습니다.");
+            throw new CustomException(USER_NOT_FOUND);
         }
 
         if (postRequestDto.getTitle() == null || postRequestDto.getTitle().isEmpty()) {
-            throw new IllegalArgumentException("글의 제목이 없습니다.");
+            throw new CustomException(POST_TITLE_NOT_FOUND);
         }
 
         if (postRequestDto.getContent() == null || postRequestDto.getContent().isEmpty()) {
-            throw new IllegalArgumentException("글의 내용이 없습니다.");
+            throw new CustomException(POST_CONTENT_NOT_FOUND);
         }
 
         this.title = postRequestDto.getTitle();
