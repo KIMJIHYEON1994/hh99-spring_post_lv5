@@ -39,10 +39,23 @@ public class Post extends Timestamped {
     @ColumnDefault("0")
     private int like;
 
-    public Post(Users users, PostRequestDto postRequestDto) {
-        this.users = users;
+    public Post(PostRequestDto postRequestDto, Users user) {
+        // 입력값 Validation
+        if (user.getUsername() == null) {
+            throw new IllegalArgumentException("username이 존재하지 않습니다.");
+        }
+
+        if (postRequestDto.getTitle() == null || postRequestDto.getTitle().isEmpty()) {
+            throw new IllegalArgumentException("글의 제목이 없습니다.");
+        }
+
+        if (postRequestDto.getContent() == null || postRequestDto.getContent().isEmpty()) {
+            throw new IllegalArgumentException("글의 내용이 없습니다.");
+        }
+
         this.title = postRequestDto.getTitle();
         this.content = postRequestDto.getContent();
+        this.users = user;
     }
 
     public void update(PostRequestDto postRequestDto) {
