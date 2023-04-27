@@ -14,6 +14,8 @@ public enum ErrorCode {
     INVALID_USER_EXISTENCE(HttpStatus.BAD_REQUEST, "중복된 username 입니다."),
     INVALID_USER_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호를 다시 입력해주세요."),
     INVALID_ADMIN_PASSWORD(HttpStatus.BAD_REQUEST, "관리자의 비밀번호를 다시 입력해주세요."),
+    POST_TITLE_NOT_FOUND(HttpStatus.NOT_FOUND, "글의 제목이 없습니다."),
+    POST_CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "글의 내용이 없습니다."),
 
 
 
