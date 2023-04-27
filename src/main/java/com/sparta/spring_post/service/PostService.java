@@ -8,23 +8,17 @@ import com.sparta.spring_post.entity.PostLike;
 import com.sparta.spring_post.entity.Users;
 import com.sparta.spring_post.exception.CustomException;
 import com.sparta.spring_post.exception.ErrorCode;
-import com.sparta.spring_post.jwt.JwtUtil;
-import com.sparta.spring_post.repository.CommentRepository;
 import com.sparta.spring_post.repository.PostLikeRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.sparta.spring_post.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,19 +27,14 @@ public class PostService {
     // PostRepository 연결
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
-    private final CommentRepository commentRepository;
     // UserRepository 연결
     private final UserRepository userRepository;
-    // JwtUtil 연결
-    private final JwtUtil jwtUtil;
-
 
     // 전체 게시물 목록 조회
     @Transactional(readOnly = true)
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc().stream().map(PostResponseDto::new).collect(Collectors.toList());
     }
-
 
     // 선택한 게시물 상세 조회
     @Transactional(readOnly = true)

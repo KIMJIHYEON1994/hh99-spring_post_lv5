@@ -69,9 +69,8 @@ public class WebSecurityConfig {
                 // JWT 인증/인가를 사용하기 위한 설정
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .exceptionHandling()
-                .authenticationEntryPoint( new AuthenticationEntryPoint() {
+        http.exceptionHandling()
+                .authenticationEntryPoint(new AuthenticationEntryPoint() {
 
                     @Override
                     public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -79,7 +78,7 @@ public class WebSecurityConfig {
                         toResponseEntity(USER_NOT_FOUND);
                     }
                 })
-                .accessDeniedHandler( new AccessDeniedHandler() {
+                .accessDeniedHandler(new AccessDeniedHandler() {
 
                     @Override
                     public void handle(HttpServletRequest request, HttpServletResponse response,
