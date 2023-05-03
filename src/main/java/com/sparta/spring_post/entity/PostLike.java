@@ -1,5 +1,6 @@
 package com.sparta.spring_post.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,11 +15,13 @@ public class PostLike {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_name")
+    @JsonManagedReference
+    @JoinColumn(name = "user_name", nullable = false)
     private Users user;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JsonManagedReference
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     public PostLike(Post post, Users user) {

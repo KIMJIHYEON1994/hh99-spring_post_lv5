@@ -1,6 +1,7 @@
 package com.sparta.spring_post.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sparta.spring_post.dto.PostRequestDto;
 import com.sparta.spring_post.exception.CustomException;
 import lombok.Getter;
@@ -29,18 +30,22 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "user_name", nullable = false)
-    private Users users;
+    private Users user;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    @OrderBy("id asc")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     @JsonBackReference
     private List<Comment> comments;
 
     @Column(name = "post_like")
     @ColumnDefault("0")
-    private int like;
+    private int post_like;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<PostLike> postLikeList;
 
     public Post(PostRequestDto postRequestDto, Users user) {
         // 입력값 Validation
@@ -58,7 +63,7 @@ public class Post extends Timestamped {
 
         this.title = postRequestDto.getTitle();
         this.content = postRequestDto.getContent();
-        this.users = user;
+        this.user = user;
     }
 
     public void update(PostRequestDto postRequestDto) {
@@ -67,7 +72,7 @@ public class Post extends Timestamped {
     }
 
     public void updateLike(boolean likeOrDislike) {
-        this.like = likeOrDislike ? this.like + 1 : this.like - 1;
+        this.post_like = likeOrDislike ? this.post_like + 1 : this.post_like - 1;
     }
 
 }

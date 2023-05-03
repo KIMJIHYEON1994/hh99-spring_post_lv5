@@ -1,5 +1,6 @@
 package com.sparta.spring_post.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sparta.spring_post.dto.CommentRequestDto;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Entity
@@ -18,6 +20,7 @@ public class Comment extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
     @ManyToOne
@@ -33,10 +36,14 @@ public class Comment extends Timestamped {
     @JsonManagedReference
     private Users users;
 
-
     @Column(name = "comment_like")
     @ColumnDefault("0")
-    private Integer like;
+    private int comment_like;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<CommentLike> commentLikeList;
+
     public Comment(Users user, CommentRequestDto commentRequestDto, Post post) {
         this.post = post;
         this.users = user;
@@ -49,7 +56,7 @@ public class Comment extends Timestamped {
     }
 
     public void updateLike(boolean likeOrDislike) {
-        this.like = likeOrDislike ? this.like + 1 : this.like - 1;
+        this.comment_like = likeOrDislike ? this.comment_like + 1 : this.comment_like - 1;
     }
 
 }

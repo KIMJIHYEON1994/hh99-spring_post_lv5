@@ -1,5 +1,6 @@
 package com.sparta.spring_post.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,11 +16,13 @@ public class CommentLike {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_name")
+    @JsonManagedReference
+    @JoinColumn(name = "user_name", nullable = false)
     private Users user;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id")
+    @JsonManagedReference
+    @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
 
