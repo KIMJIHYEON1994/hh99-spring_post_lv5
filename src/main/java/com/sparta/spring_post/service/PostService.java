@@ -5,9 +5,9 @@ import com.sparta.spring_post.dto.PostResponseDto;
 import com.sparta.spring_post.dto.UserResponseDto;
 import com.sparta.spring_post.entity.Post;
 import com.sparta.spring_post.entity.PostLike;
+import com.sparta.spring_post.entity.RoleType;
 import com.sparta.spring_post.entity.Users;
 import com.sparta.spring_post.exception.CustomException;
-import com.sparta.spring_post.exception.ErrorCode;
 import com.sparta.spring_post.repository.PostLikeRepository;
 import com.sparta.spring_post.repository.PostRepository;
 import com.sparta.spring_post.repository.UserRepository;
@@ -63,7 +63,7 @@ public class PostService {
                 () -> new CustomException(POST_NOT_FOUND)
         );
 
-        if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
+        if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
             post.update(postRequestDto);
             return new PostResponseDto(post);
         } else {
@@ -78,7 +78,7 @@ public class PostService {
                 () -> new CustomException(POST_NOT_FOUND)
         );
 
-        if (post.getUsers().getUsername().equals(user.getUsername()) || user.getRole().equals(user.getRole().ADMIN)) {
+        if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole().equals(RoleType.ADMIN)) {
             postRepository.delete(post);
             return UserResponseDto.setSuccess("게시글 삭제 성공");
         } else {
